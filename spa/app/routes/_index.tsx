@@ -43,9 +43,12 @@ export default function Index() {
               <div>📚 books</div>
               <div>🌱 garden stuff</div>
             </div>
-            <button className="mt-6 px-8 py-3 bg-black text-white font-bold text-xl hover:bg-gray-800 transform hover:-translate-y-1 transition">
+            <Link
+              to="/goods"
+              className="mt-6 px-8 py-3 bg-black text-white font-bold text-xl hover:bg-gray-800 transform hover:-translate-y-1 transition inline-block"
+            >
               SEE THE GOODS →
-            </button>
+            </Link>
           </div>
 
           <div className="border-4 border-black p-6 transform -rotate-1 bg-yellow-200">
