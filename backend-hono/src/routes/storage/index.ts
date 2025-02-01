@@ -11,7 +11,7 @@ const uploadSchema = z.object({
 });
 
 // Get upload URL
-app.post("/upload", zValidator("json", uploadSchema), async (c) => {
+app.post("/upload", requireAuth, zValidator("json", uploadSchema), async (c) => {
   const { fileName} = c.req.valid("json");
   const session = c.get("session") as { userId: string };
   
@@ -25,7 +25,7 @@ app.post("/upload", zValidator("json", uploadSchema), async (c) => {
 });
 
 // Get download URL
-app.get("/download/:key", async (c) => {
+app.get("/download/:key", requireAuth, async (c) => {
   const key = c.req.param("key");
   
   try {
