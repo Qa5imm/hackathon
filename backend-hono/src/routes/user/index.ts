@@ -7,10 +7,14 @@ import {
   type OAuth2Tokens,
   decodeIdToken,
 } from "arctic";
-import { createUser, findByEmail, findById, getUserStats } from "@/repository/user";
+import {
+  createUser,
+  findByEmail,
+  findById,
+  getUserStats,
+} from "@/repository/user";
 import { hash } from "@/lib/utils";
 import { getCookie } from "hono/cookie";
-
 
 const app = new Hono();
 app
@@ -24,7 +28,7 @@ app
     await lucia.invalidateSession(session.id);
     const cookie = lucia.createBlankSessionCookie();
     cookie.attributes.domain =
-      process.env.ENVIRONMENT === "prod" ? ".gethunar.com" : "localhost";
+      process.env.ENVIRONMENT === "prod" ? ".providence.lol" : "localhost";
 
     c.header("Set-Cookie", cookie.serialize());
     return c.json({ message: "Logged out" });
@@ -40,7 +44,7 @@ app
     ]);
 
     const cookieDomain =
-      process.env.ENVIRONMENT === "prod" ? ".gethunar.com" : "localhost";
+      process.env.ENVIRONMENT === "prod" ? ".providence.lol" : "localhost";
     const maxAge = 60 * 10;
 
     c.header(
@@ -85,7 +89,7 @@ app
         const session = await lucia.createSession(existingUser.id, {});
         const cookie = lucia.createSessionCookie(session.id);
         cookie.attributes.domain =
-          process.env.ENVIRONMENT === "prod" ? ".gethunar.com" : "localhost";
+          process.env.ENVIRONMENT === "prod" ? ".providence.lol" : "localhost";
 
         c.header("Set-Cookie", cookie.serialize());
         return c.json({ message: "Logged in with Google", user: existingUser });
@@ -99,7 +103,7 @@ app
       const session = await lucia.createSession(createdUser.id, {});
       const cookie = lucia.createSessionCookie(session.id);
       cookie.attributes.domain =
-        process.env.ENVIRONMENT === "prod" ? ".gethunar.com" : "localhost";
+        process.env.ENVIRONMENT === "prod" ? ".providence.lol" : "localhost";
 
       c.header("Set-Cookie", cookie.serialize());
       return c.json({
@@ -127,10 +131,10 @@ app
       if (!user) {
         return c.json({ error: "User data not found" }, 404);
       }
-      const data={
+      const data = {
         ...user,
-        stats
-      }
+        stats,
+      };
       return c.json(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -141,8 +145,6 @@ app
         500,
       );
     }
-  }) 
-
-
+  });
 
 export const userRouter = app;
