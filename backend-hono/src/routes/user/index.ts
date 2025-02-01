@@ -7,7 +7,7 @@ import {
   type OAuth2Tokens,
   decodeIdToken,
 } from "arctic";
-import { createUser, findByEmail, findById } from "@/repository/user";
+import { createUser, findByEmail, findById, getUserStats } from "@/repository/user";
 import { hash } from "@/lib/utils";
 import { getCookie } from "hono/cookie";
 
@@ -121,16 +121,17 @@ app
         return c.json({ error: "User not found" }, 401);
       }
 
-      const user_data = await findById(session.userId);
+      const user = await findById(session.userId);
+      const stats = await getUserStats(session.userId);
 
-      if (!user_data) {
+      if (!user) {
         return c.json({ error: "User data not found" }, 404);
       }
-      
-      
-      
-
-      return c.json({ data: user_data, error: null });
+      const data={
+        ...user,
+        stats
+      }
+      return c.json(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
       return c.json(
@@ -142,34 +143,6 @@ app
     }
   }) 
 
-  // items shared, total borrows,  
-  .get("/stats", async (c) => { 
-    try {
-      const session = c.get("session");
-
-      console.log(session);
-
-      if (!session?.userId) {
-        return c.json({ error: "User not found" }, 401);
-      }
-
-      const user_data = await findById(session.userId);
-
-      if (!user_data) {
-        return c.json({ error: "User data not found" }, 404);
-      }
-
-      return c.json({ data: user_data, error: null });
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      return c.json(
-        {
-          error: "An error occurred while fetching user data",
-        },
-        500,
-      );
-    }
-  });
 
 
 export const userRouter = app;

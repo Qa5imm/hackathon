@@ -1,6 +1,6 @@
 import { db } from "../lib/db";
-import { user, password } from "../lib/db/schema";
-import { eq, InferInsertModel, InferSelectModel } from "drizzle-orm";
+import { user, password, lease, item } from "../lib/db/schema";
+import { eq, InferInsertModel, InferSelectModel, count } from "drizzle-orm";
 import { hash } from "@/lib/utils";
 
 type User = InferSelectModel<typeof user>;
@@ -57,3 +57,30 @@ export const getAll = async (): Promise<User[]> => await db.select().from(user);
 export const updateUserCoins = async (id: string, coins: number) => {
   await db.update(user).set({ coins: coins }).where(eq(user.id, id));
 }
+
+export const getUserStats = async (userId: string) => {
+  const [itemCount] = await db
+    .select({ count: count() })
+    .from(item)
+    .where(eq(item.userId, userId));
+
+  const [lenderLeaseCount] = await db
+    .select({ count: count() })
+    .from(lease)
+    .where(eq(lease.lenderId, userId));
+
+  const [borrowerLeaseCount] = await db
+    .select({ count: count() })
+    .from(lease)
+    .where(eq(lease.borrowerId, userId));
+
+  const userDetails = await findById(userId);
+
+  return {
+    totalCoins: userDetails?.coins || 0,
+    totalLeases: lenderLeaseCount?.count + borrowerLeaseCount?.count || 0,
+    itemsListed: itemCount?.count || 0,
+    leasesAsLender: lenderLeaseCount?.count || 0,
+    leasesAsBorrower: borrowerLeaseCount?.count || 0,
+  };
+};
