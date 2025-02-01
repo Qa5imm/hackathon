@@ -4,6 +4,7 @@ import { z } from "zod";
 import * as itemRepository from "../../repository/item";
 import { requireAuth } from "@/lib/middleware/auth";
 import * as userRepository from "@/repository/user";
+import { item } from "@/lib/db/schema";
 
 const itemRouter = new Hono();
 

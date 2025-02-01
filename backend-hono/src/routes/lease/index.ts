@@ -86,12 +86,10 @@ app.patch("/:id/status", requireAuth, zValidator("json", updateLeaseStatusSchema
   if (!lease_found) {
     return c.json({ message: "Lease not found" }, 404);
   }
-
-  if (status === 'active') {
+   if (status === 'active') {
     // Reject all other lease requests for the same item
     await leaseRepository.updateOtherLeasesStatus(id, lease_found.itemId, 'rejected');
-  }
-  
+  }  
   // updating the coins of the lender and borrower and updating the status of the lease 
   await userRepository.updateUserCoins(lease_found.borrowerId, (borrowerDetails?.coins || 0) - lease_found.totalAmount);
   await userRepository.updateUserCoins(lease_found.lenderId, (lenderDetails?.coins || 0) + lease_found.totalAmount);
