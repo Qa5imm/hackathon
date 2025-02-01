@@ -33,6 +33,7 @@ export const user = mysqlTable(
       .primaryKey(),
     name: varchar("name", { length: 50 }).notNull(),
     email: varchar("email", { length: 255 }).notNull().unique(),
+    coins: int("coins").notNull().default(500),
     created_at: timestamp("created_at").defaultNow(),
   },
   (user) => ({
@@ -40,7 +41,6 @@ export const user = mysqlTable(
     name_index: index("name_idx").on(user.name),
   }),
 );
-
 export const password = mysqlTable(
   "password",
   {

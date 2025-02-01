@@ -52,3 +52,8 @@ export const findById = async (id: string): Promise<User | undefined> =>
     .then((rows) => rows[0]);
 
 export const getAll = async (): Promise<User[]> => await db.select().from(user);
+
+
+export const updateUserCoins = async (id: string, coins: number) => {
+  await db.update(user).set({ coins: coins }).where(eq(user.id, id));
+}

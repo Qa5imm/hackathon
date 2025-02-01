@@ -111,9 +111,9 @@ app
       return c.json({ error: (error as Error).message }, 500);
     }
   })
-  .get("/", async (c) => {
+  .get("/me", async (c) => {
     try {
-      const session = c.get("session");
+      const session = c.get("session") as { userId: string };
 
       console.log(session);
 
@@ -126,6 +126,9 @@ app
       if (!user_data) {
         return c.json({ error: "User data not found" }, 404);
       }
+      
+      
+      
 
       return c.json({ data: user_data, error: null });
     } catch (error) {
