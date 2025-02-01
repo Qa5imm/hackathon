@@ -5,7 +5,7 @@ import { useNavigate } from "@remix-run/react";
 
 // moved to separate file ideally
 export const authApi = {
-  checkUser: () => axios.get("http://localhost:3000/auth/me"),
+  checkUser: () => axios.get("/auth/me"),
   googleCallback: (params: { code: string; state: string }) =>
     axios.get("/auth/google/callback", { params }),
   googleLogin: () => axios.get("/auth/google/login"),

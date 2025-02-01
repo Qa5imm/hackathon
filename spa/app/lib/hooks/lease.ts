@@ -3,11 +3,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const leaseApi = {
   getLenderLeases: (lenderId: string) =>
-    axios.get(`http://localhost:3000/leases/lender/${lenderId}`),
+    axios.get(`/leases/lender/${lenderId}`),
   getBorrowerLeases: (borrowerId: string) =>
-    axios.get(`http://localhost:3000/leases/borrower/${borrowerId}`),
+    axios.get(`/leases/borrower/${borrowerId}`),
   updateLeaseStatus: (id: string, status: LeaseStatus) =>
-    axios.patch(`http://localhost:3000/leases/${id}/status`, { status }),
+    axios.patch(`/leases/${id}/status`, { status }),
 };
 
 export const useLenderLeases = (lenderId?: string) => {

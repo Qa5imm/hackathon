@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useToast } from "~/hooks/use-toast";
 import { useUpdateLeaseStatus } from "~/lib/hooks/lease";
 
 export const LeaseCard = ({
@@ -31,16 +33,38 @@ export const LeaseCard = ({
   };
   type: "borrowed" | "request";
 }) => {
-  console.log("lease", lease);
+  const [confirming, setConfirming] = useState<
+    "accept" | "reject" | "return" | null
+  >(null);
   const updateLeaseMutation = useUpdateLeaseStatus();
+  const { toast } = useToast();
 
   const handleStatusUpdate = async (
     status: "active" | "completed" | "rejected"
   ) => {
-    await updateLeaseMutation.mutateAsync({
-      id: lease.id,
-      status,
-    });
+    try {
+      await updateLeaseMutation.mutateAsync({
+        id: lease.id,
+        status,
+      });
+
+      toast({
+        title:
+          status === "active"
+            ? "lease accepted fr fr"
+            : status === "completed"
+            ? "marked as returned no cap"
+            : "request rejected rip",
+        variant: "default",
+      });
+
+      setConfirming(null);
+    } catch {
+      toast({
+        title: "something ain't right chief",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

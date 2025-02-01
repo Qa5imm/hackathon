@@ -2,14 +2,12 @@ import axios from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const itemApi = {
-  getItems: () => axios.get("http://localhost:3000/items"),
-  getItem: (id: string) => axios.get(`http://localhost:3000/items/${id}`),
-  getUserItems: (userId: string) =>
-    axios.get(`http://localhost:3000/items/users/${userId}/items`),
-  createItem: (data: CreateItemDto) =>
-    axios.post("http://localhost:3000/items", data),
+  getItems: () => axios.get("/items"),
+  getItem: (id: string) => axios.get(`/items/${id}`),
+  getUserItems: (userId: string) => axios.get(`/items/users/${userId}/items`),
+  createItem: (data: CreateItemDto) => axios.post("/items", data),
   updateItem: (id: string, data: UpdateItemDto) =>
-    axios.patch(`http://localhost:3000/items/${id}`, data),
+    axios.patch(`/items/${id}`, data),
 };
 
 export const useItems = () => {
