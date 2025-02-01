@@ -40,7 +40,6 @@ app.post("/", requireAuth, zValidator("json", createLeaseSchema), async (c) => {
   const session = c.get("session") as { userId: string };
   const borrowerDetails = await userRepository.findById(session.userId);
   const itemDetails= await itemRepository.findItemById(data.itemId);
-  const lenderDetails= await itemRepository.findItemById(itemDetails?.userId || "");
  
   const totalAmount=  data.duration* (itemDetails?.coins || 0)
   if (borrowerDetails && itemDetails) {
@@ -49,12 +48,8 @@ app.post("/", requireAuth, zValidator("json", createLeaseSchema), async (c) => {
   }
   else{
 
-    
-    const lenderId= lenderDetails?.id || ""
+    const lenderId= itemDetails?.id || ""
     const borrowerId= session.userId
-
-    await userRepository.updateUserCoins(borrowerId, borrowerDetails.coins-totalAmount);
-    await userRepository.updateUserCoins(lenderId, (lenderDetails?.coins || 0)+totalAmount);
 
     const lease = await leaseRepository.createLease({
       ...data,
@@ -62,7 +57,7 @@ app.post("/", requireAuth, zValidator("json", createLeaseSchema), async (c) => {
       lenderId,
       borrowerId,
     });
-  return c.json(lease, 201);
+  return c.json({lease}, 201);
 
   }
 }
@@ -84,8 +79,24 @@ app.post("/", requireAuth, zValidator("json", createLeaseSchema), async (c) => {
 app.patch("/:id/status", requireAuth, zValidator("json", updateLeaseStatusSchema), async (c) => {
   const id = c.req.param("id");
   const { status } = c.req.valid("json");
+  const lease_found = await leaseRepository.findLeaseById(id);
+  const borrowerDetails = await userRepository.findById(lease_found.borrowerId);
+  const lenderDetails = await userRepository.findById(lease_found.lenderId);
+
+  if (!lease_found) {
+    return c.json({ message: "Lease not found" }, 404);
+  }
+
+  if (status === 'active') {
+    // Reject all other lease requests for the same item
+    await leaseRepository.updateOtherLeasesStatus(id, lease_found.itemId, 'rejected');
+  }
   
+  // updating the coins of the lender and borrower and updating the status of the lease 
+  await userRepository.updateUserCoins(lease_found.borrowerId, (borrowerDetails?.coins || 0) - lease_found.totalAmount);
+  await userRepository.updateUserCoins(lease_found.lenderId, (lenderDetails?.coins || 0) + lease_found.totalAmount);
   const lease = await leaseRepository.updateLeaseStatus(id, status);
+
   return c.json(lease);
 });
 

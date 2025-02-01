@@ -1,6 +1,6 @@
 import { db } from "../lib/db";
 import { lease, leasetatus } from "@/lib/db/schema";
-import { eq, and, InferInsertModel, InferSelectModel } from "drizzle-orm";
+import { eq, and, InferInsertModel, InferSelectModel, ne } from "drizzle-orm";
 
 type LeaseStatus = 'pending' | 'active' | 'completed' | 'rejected'; 
 interface CreateLease {
@@ -82,4 +82,26 @@ export const findLeasesByItemId = async (itemId: string) => {
     .from(lease)
     .where(eq(lease.itemId, itemId))
     .orderBy(lease.created_at);
+};
+
+export const updateOtherLeasesStatus = async (
+  currentLeaseId: string,
+  itemId: string,
+  status: LeaseStatus
+): Promise<number> => {
+  const result = await db
+    .update(lease)
+    .set({ 
+      status,
+      updated_at: new Date() 
+    })
+    .where(
+      and(
+        eq(lease.itemId, itemId),
+        ne(lease.id, currentLeaseId),
+        eq(lease.status, 'pending')
+      )
+    );
+
+  return result.length;
 };
