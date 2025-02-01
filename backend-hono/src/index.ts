@@ -2,9 +2,10 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { userRouter } from "./routes/user";
-import {leaseRouter} from "./routes/lease";
+import { leaseRouter } from "./routes/lease";
 import { authMiddleware, requireAuth } from "./lib/middleware/auth";
 import { storageRouter } from "./routes/storage";
+import itemRouter from "./routes/item";
 
 const app = new Hono();
 
@@ -25,6 +26,7 @@ app.use("*", authMiddleware); // parse cookies
 app.route("/storage", storageRouter);
 app.route("/leases", leaseRouter);
 app.route("/auth", userRouter);
+app.route("/items", itemRouter);
 // app.use(protectRoute);
 
 export default app;

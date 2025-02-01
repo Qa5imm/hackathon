@@ -18,7 +18,7 @@ export default function Index() {
   const userQuery = useUser(navigate);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-100 to-cyan-100 p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-4xl mx-auto border-4 border-black p-8 mt-12 bg-white/80 backdrop-blur-sm">
         <header className="mb-16">
           <h1 className="text-6xl font-black uppercase mb-4 transform -rotate-2">

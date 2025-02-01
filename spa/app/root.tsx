@@ -5,6 +5,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import Navbar from "./components/navbar";
 import type { LinksFunction } from "@remix-run/node";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import axios from "axios";
@@ -51,8 +52,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className=" bg-gradient-to-br from-emerald-100 to-cyan-100 ">
         <QueryClientProvider client={queryClient}>
+          <Navbar></Navbar>
           {children}
           <ScrollRestoration />
           <Scripts />

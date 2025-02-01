@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@remix-run/react";
 
 // moved to separate file ideally
@@ -9,6 +9,7 @@ export const authApi = {
   googleCallback: (params: { code: string; state: string }) =>
     axios.get("/auth/google/callback", { params }),
   googleLogin: () => axios.get("/auth/google/login"),
+  logout: () => axios.post("/auth/logout"),
 };
 
 export const useUser = (navigate: ReturnType<typeof useNavigate>) => {
@@ -49,6 +50,17 @@ export const useGoogleAuth = () => {
   };
 
   return { handleGoogleAuth };
+};
+
+export const useLogout = (navigate: ReturnType<typeof useNavigate>) => {
+  const utils = useQueryClient();
+  return useMutation({
+    mutationFn: authApi.logout,
+    onSuccess: () => {
+      utils.clear();
+      navigate("/");
+    },
+  });
 };
 
 export const useAuth = (navigate: ReturnType<typeof useNavigate>) => {

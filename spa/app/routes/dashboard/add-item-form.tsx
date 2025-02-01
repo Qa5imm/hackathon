@@ -8,10 +8,12 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useCreateItem, useUpdateItem } from "~/lib/hooks/item";
+import { useState } from "react";
 
 const itemSchema = z.object({
-  name: z.string().min(3, "name must be at least 3 characters"),
-  description: z.string().min(10, "description must be at least 10 characters"),
+  name: z.string().min(3),
+  description: z.string().min(10),
   category: z.enum([
     "electronics",
     "clothing",
@@ -20,7 +22,7 @@ const itemSchema = z.object({
     "tools",
     "other",
   ]),
-  image: z.string().optional(),
+  image: z.any().optional(),
   coins: z.number().min(0).default(0),
 });
 
@@ -52,10 +54,17 @@ function ItemForm({
     },
   });
 
-  const imageFile = watch("image")?.[0];
+  const imageValue = watch("image");
+  const imageFile = imageValue instanceof FileList ? imageValue[0] : null;
+  const imageUrl = typeof imageValue === "string" ? imageValue : null;
+
+  const handleFormSubmit = handleSubmit(async (data) => {
+    console.log("form submitted with:", data); // DEBUG
+    await onSubmit(data);
+  });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
+    <form onSubmit={handleFormSubmit} className="space-y-4 mt-4">
       {/* Name Input */}
       <div>
         <label className="block font-mono mb-2" htmlFor="name">
@@ -126,10 +135,10 @@ function ItemForm({
           {...register("image")}
           className="w-full px-4 py-2 border-4 border-black font-mono bg-white"
         />
-        {imageFile && (
+        {(imageFile || imageUrl) && (
           <div className="mt-2">
             <img
-              src={URL.createObjectURL(imageFile)}
+              src={imageFile ? URL.createObjectURL(imageFile) : imageUrl!}
               alt="Preview"
               className="w-32 h-32 object-cover border-4 border-black"
             />
@@ -169,27 +178,27 @@ function ItemForm({
 }
 
 export function AddItemDialog() {
-  const onSubmit = async (data: ItemFormData) => {
-    try {
-      let imageUrl = "";
-      if (data.image?.[0]) {
-        // upload image logic here
-      }
+  const addItemMutation = useCreateItem();
+  const [open, setOpen] = useState(false);
 
+  const onSubmit = async (data: ItemFormData) => {
+    console.log(data);
+    try {
       const itemData = {
         ...data,
-        image: imageUrl,
+        image: "thisisanimageurl", // todo: real image upload
         status: "listed" as const,
       };
 
-      console.log(itemData);
+      await addItemMutation.mutateAsync(itemData);
+      setOpen(false); // close dialog on success
     } catch (err) {
       console.error(err);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="px-4 py-2 bg-black text-white font-bold hover:bg-gray-800 transform hover:-translate-y-1 transition">
           + ADD NEW ITEM
@@ -213,28 +222,31 @@ export function AddItemDialog() {
   );
 }
 
-export function EditItemDialog({ item }: { item: ItemFormData }) {
+export function EditItemDialog({
+  item,
+}: {
+  item: ItemFormData & { id: string };
+}) {
+  const editItemMutation = useUpdateItem();
+  const [open, setOpen] = useState(false);
+
   const onSubmit = async (data: ItemFormData) => {
     try {
-      let imageUrl = "";
-      if (data.image?.[0]) {
-        // upload image logic here
-      }
-
       const itemData = {
         ...data,
-        image: imageUrl,
+        image: "thisisanimageurl", // todo: real image upload
         status: "listed" as const,
       };
 
-      console.log(itemData);
+      await editItemMutation.mutateAsync({ id: item.id, data: itemData });
+      setOpen(false);
     } catch (err) {
       console.error(err);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="px-4 py-2 bg-black text-white font-bold hover:bg-gray-800 transform hover:-translate-y-1 transition">
           EDIT ITEM
