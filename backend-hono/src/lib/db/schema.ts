@@ -5,8 +5,26 @@ import {
   timestamp,
   varchar,
   index,
+  mysqlEnum,
 } from "drizzle-orm/mysql-core";
 import { createId } from "@paralleldrive/cuid2";
+
+export const ItemCategory = {
+  ELECTRONICS: 'electronics',
+  CLOTHING: 'clothing',
+  BOOKS: 'books',
+  SPORTS: 'sports',
+  TOOLS: 'tools',
+  OTHER: 'other',
+} as const
+
+// Add at the top with other imports and enums
+export enum leasetatus {
+  PENDING = 'pending',
+  ACTIVE = 'active',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled'
+}
 
 export const user = mysqlTable(
   "user",
@@ -59,20 +77,57 @@ export const session = mysqlTable(
     userIdIdx: index("user_id_session_idx").on(table.userId),
   }),
 );
-export const posts = mysqlTable(
-  "posts",
+
+export const item = mysqlTable(
+  "item",
   {
-    id: int("id").primaryKey().autoincrement(),
-    title: varchar("title", { length: 255 }).notNull(),
-    content: text("content").notNull(),
-    user_id: varchar("user_id", { length: 128 })
+    id: varchar("id", { length: 128 })
+      .primaryKey(),
+    userId: varchar("user_id", { length: 128 })
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => user.id),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    image: varchar("image", { length: 255 }),
+    coins: int("coins").notNull().default(0),
+    category: mysqlEnum("category", [
+      'electronics',
+      'clothing',
+      'books',
+      'sports',
+      'tools',
+      'other'
+    ] as const).notNull(),
+    status: mysqlEnum("status", ["listed", "leased", "delisted"] as const).notNull(),
     created_at: timestamp("created_at").defaultNow(),
+    updated_at: timestamp("updated_at").defaultNow(),
   },
-  (posts) => ({
-    user_id_index: index("user_id_idx").on(posts.user_id),
-    title_index: index("title_idx").on(posts.title),
-    created_at_index: index("created_at_idx").on(posts.created_at),
-  }),
+  (table) => ({
+    userIdIdx: index("user_id_items_idx").on(table.userId),
+    categoryIdx: index("category_idx").on(table.category),
+    nameIdx: index("name_items_idx").on(table.name),
+  })
+);
+
+export const lease = mysqlTable(
+  "lease",
+  {
+    id: varchar("id", { length: 128 })
+      .primaryKey(),
+    userId: varchar("user_id", { length: 128 })
+      .notNull()
+      .references(() => user.id),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    image: varchar("image", { length: 255 }),
+    coins: int("coins").notNull().default(0),
+    category: mysqlEnum("status", ["active", "completed", "overdue"]).notNull(),
+    created_at: timestamp("created_at").defaultNow(),
+    updated_at: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    userIdIdx: index("user_id_items_idx").on(table.userId),
+    categoryIdx: index("category_idx").on(table.category),
+    nameIdx: index("name_items_idx").on(table.name),
+  })
 );
