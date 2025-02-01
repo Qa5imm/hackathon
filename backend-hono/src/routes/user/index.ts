@@ -11,7 +11,9 @@ import { createUser, findByEmail, findById } from "@/repository/user";
 import { hash } from "@/lib/utils";
 import { getCookie } from "hono/cookie";
 
-export const authRouter = new Hono()
+
+const app = new Hono();
+app
   .post("/logout", async (c) => {
     const session = c.get("session");
 
@@ -27,52 +29,6 @@ export const authRouter = new Hono()
     c.header("Set-Cookie", cookie.serialize());
     return c.json({ message: "Logged out" });
   })
-  // .post("/login", async (c) => {
-  //   const { email, password } = await c.req.json();
-
-  //   const [existing_user] = await getUserAndPassword(email);
-
-  //   if (!existing_user) {
-  //     return c.json({ error: "Account does not exist" }, 401);
-  //   }
-
-  //   const valid_password =
-  //     (await hash(password)) === existing_user.password.hash;
-
-  //   if (!valid_password) {
-  //     return c.json({ error: "Invalid credentials" }, 401);
-  //   }
-
-  //   const session = await lucia.createSession(existing_user.user.id, {});
-  //   const cookie = lucia.createSessionCookie(session.id);
-  //   cookie.attributes.domain =
-  //     process.env.ENVIRONMENT === "prod" ? ".gethunar.com" : "localhost";
-
-  //   c.header("Set-Cookie", cookie.serialize());
-  //   return c.json({ message: "Logged in", user: existing_user.user });
-  // })
-  // .post("/register", async (c) => {
-  //   const { email, name, password } = await c.req.json();
-
-  //   const existing_user = await findByEmail(email);
-
-  //   if (existing_user) {
-  //     return c.json({ error: "Account already exists" }, 400);
-  //   }
-
-  //   const created_user = await createUser({ email, name, password });
-  //   if (!created_user) {
-  //     return c.json({ error: "Failed to create account" }, 500);
-  //   }
-
-  //   const session = await lucia.createSession(created_user.id, {});
-  //   const cookie = lucia.createSessionCookie(session.id);
-  //   cookie.attributes.domain =
-  //     process.env.ENVIRONMENT === "prod" ? ".gethunar.com" : "localhost";
-
-  //   c.header("Set-Cookie", cookie.serialize());
-  //   return c.json({ message: "Account created", user: created_user });
-  // })
   .get("/google/login", async (c) => {
     const state = generateState();
     const codeVerifier = generateCodeVerifier();
@@ -181,4 +137,36 @@ export const authRouter = new Hono()
         500,
       );
     }
+  }) 
+
+  // items shared, total borrows,  
+  .get("/stats", async (c) => { 
+    try {
+      const session = c.get("session");
+
+      console.log(session);
+
+      if (!session?.userId) {
+        return c.json({ error: "User not found" }, 401);
+      }
+
+      const user_data = await findById(session.userId);
+
+      if (!user_data) {
+        return c.json({ error: "User data not found" }, 404);
+      }
+
+      return c.json({ data: user_data, error: null });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      return c.json(
+        {
+          error: "An error occurred while fetching user data",
+        },
+        500,
+      );
+    }
   });
+
+
+export const userRouter = app;

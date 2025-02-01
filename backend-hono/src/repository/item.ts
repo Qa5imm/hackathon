@@ -1,6 +1,6 @@
 import { db } from "../lib/db";
 import { item } from "../lib/db/schema";
-import { eq, InferInsertModel, InferSelectModel } from "drizzle-orm";
+import { eq, and, inArray, InferInsertModel, InferSelectModel } from "drizzle-orm";
 
 type Item = InferSelectModel<typeof item>;
 type NewItem = InferInsertModel<typeof item>;
@@ -73,10 +73,15 @@ export const findAllItems = async (): Promise<Item[]> => {
     .orderBy(item.created_at);
 };
 
-export const findItemsByUserId = async (userId: string): Promise<Item[]> => {
+export const findItemsByUserId = async (userId: string, status: enumItemStatus[]): Promise<Item[]> => {
   return await db
     .select()
     .from(item)
-    .where(eq(item.userId, userId))
+    .where(
+      and(
+        eq(item.userId, userId),
+        inArray(item.status, status)
+      )
+    )
     .orderBy(item.created_at);
 };

@@ -3,6 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import * as itemRepository from "../../repository/item";
 import {requireAuth} from "@/lib/middleware/auth"
+import * as userRepository from "@/repository/user";
 
 const app = new Hono();
 
@@ -12,7 +13,6 @@ const createItemSchema = z.object({
   image: z.string().optional(),
   status: z.enum(["listed", "leased", "delisted"]),
   coins: z.number().min(0),
-  userId: z.string(),
   category: z.enum(["electronics", "clothing", "books", "sports", "tools", "other"]),
 
 });
@@ -33,7 +33,8 @@ app.post("/", requireAuth, zValidator("json", createItemSchema), async (c) => {
   const session = c.get("session") as { userId: string };
   const userId= session.userId;
 if(!userId){    
-    return c.json({ message: "Unauthorized" }, 403); }
+    return c.json({ message: "Unauthorized" }, 403);
+   }
   const item = await itemRepository.createItem({
     ...data,
     userId,
@@ -45,7 +46,11 @@ if(!userId){
 // Get all items
 app.get("/", async (c) => {
   const items = await itemRepository.findAllItems();
-  return c.json(items);
+  const itemsWithUserData = await Promise.all(items.map(async (item) => {
+    const user = await userRepository.findById(item.userId);
+    return { ...item, user };
+  }));
+  return c.json(itemsWithUserData);
 });
 
 // Get item by id
@@ -57,13 +62,25 @@ app.get("/:id", async (c) => {
     return c.json({ message: "Item not found" }, 404);
   }
 
-  return c.json(item);
+  const user = await userRepository.findById(item.userId);
+  return c.json({ ...item, user });
 });
 
 // Get user items
 app.get("/users/:userId/items", async (c) => {
   const userId = c.req.param("userId");
-  const items = await itemRepository.findItemsByUserId(userId);
+  const session = c.get("session") as { userId: string };
+  const sessionId= session.userId;
+  let items;
+  if(sessionId !== userId){ 
+
+  items = await itemRepository.findItemsByUserId(userId, ["listed", "leased"]);
+  }else{
+
+  items = await itemRepository.findItemsByUserId(userId, ["listed", "leased", "delisted"]);
+  }
+  
+
   return c.json(items);
 });
 
