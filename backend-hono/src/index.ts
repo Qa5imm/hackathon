@@ -4,6 +4,7 @@ import { logger } from "hono/logger";
 import { authRouter } from "./routes/auth";
 import {leaseRouter} from "./routes/lease";
 import { authMiddleware, requireAuth } from "./lib/middleware/auth";
+import { storageRouter } from "./routes/storage";
 
 const app = new Hono();
 
@@ -21,6 +22,7 @@ app.use(
 );
 
 app.use("*", authMiddleware); // parse cookies
+app.route("/storage", storageRouter);
 app.route("/leases", leaseRouter);
 app.route("/auth", authRouter);
 // app.use(protectRoute);
