@@ -12,6 +12,7 @@ const createItemSchema = z.object({
   image: z.string().optional(),
   status: z.enum(["listed", "leased", "delisted"]),
   coins: z.number().min(0),
+  userId: z.string(),
   category: z.enum(["electronics", "clothing", "books", "sports", "tools", "other"]),
 
 });
@@ -29,7 +30,7 @@ export const updateItemSchema = z.object({
 // Create item
 app.post("/", requireAuth, zValidator("json", createItemSchema), async (c) => {
   const data =  await c.req.valid("json");
-  const session = c.get("session");
+  const session = c.get("session") as { userId: string };
   const userId= session.userId;
 if(!userId){    
     return c.json({ message: "Unauthorized" }, 403); }
@@ -70,8 +71,8 @@ app.get("/users/:userId/items", async (c) => {
 app.patch("/:id", requireAuth, zValidator("json", updateItemSchema), async (c) => {
   const id = c.req.param("id");
   const data = c.req.valid("json");
-  const session = c.get("session");
-  const userId= session.userId;
+  const session = c.get("session") as { userId: string };
+  const userId= session.userId ;
 
   const existingItem = await itemRepository.findItemById(id);
   if (!existingItem) {

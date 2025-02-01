@@ -2,7 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { authRouter } from "./routes/auth";
-import { authMiddleware } from "./lib/middleware/auth";
+import {leaseRouter} from "./routes/lease";
+import { authMiddleware, requireAuth } from "./lib/middleware/auth";
 
 const app = new Hono();
 
@@ -20,6 +21,7 @@ app.use(
 );
 
 app.use("*", authMiddleware); // parse cookies
+app.route("/leases", leaseRouter);
 app.route("/auth", authRouter);
 // app.use(protectRoute);
 

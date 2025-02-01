@@ -1,95 +1,85 @@
 import { db } from "../lib/db";
-import { lease } from "@/lib/db/schema";
+import { lease, leasetatus } from "@/lib/db/schema";
 import { eq, and, InferInsertModel, InferSelectModel } from "drizzle-orm";
 
-type Lease = InferSelectModel<typeof leases>;
-type NewLease = InferInsertModel<typeof leases>;
-
-type LeaseStatus = 'pending' | 'active' | 'completed'; 
-
+type LeaseStatus = 'pending' | 'active' | 'completed' | 'rejected'; 
 interface CreateLease {
-  item_id: string;
-  lender_id: string;
-  borrower_id: string;
+  itemId: string;
+  lenderId: string;
+  borrowerId: string;
   duration: number;
-  total_amount: number;
+  totalAmount: number;
 }
 
-interface UpdateLease {
-  status: LeaseStatus;
-}
-
-export const createLease = async (data: CreateLease): Promise<Lease> => {
-  const [lease] = await db
-    .insert(leases)
+export const createLease = async (data: CreateLease) => {
+  const [created_lease] = await db
+    .insert(lease)
     .values({
-      id: nanoid(),
-      ...data,
-      status: 'pending',
-    })
-    .returning();
+        ...data,
+        status: 'pending',
+      })
+    .$returningId()
 
-  if (!lease) {
+  if (!created_lease) {
     throw new Error("Failed to create lease");
   }
 
-  return lease;
+  return created_lease;
 };
 
-export const updateLeaseStatus = async (id: string, status: LeaseStatus): Promise<Lease> => {
-  const [updated] = await db
-    .update(leases)
+export const updateLeaseStatus = async (id: string, status: LeaseStatus) => {
+  const [updated_lease] = await db
+    .update(lease)
     .set({ 
       status,
       updated_at: new Date()
     })
-    .where(eq(leases.id, id))
-    .returning();
+    .where(eq(lease.id, id))
 
-  if (!updated) {
+  if (!updated_lease) {
     throw new Error("Failed to update lease");
   }
 
-  return updated;
+  return updated_lease;
 };
 
-export const findLeaseById = async (id: string): Promise<Lease | undefined> => {
-  const [lease] = await db
+export const findLeaseById = async (id: string) => {
+  const [found_lease] = await db
     .select()
-    .from(leases)
-    .where(eq(leases.id, id))
+    .from(lease)
+    .where(eq(lease.id, id))
     .limit(1);
 
-  return lease;
+  return found_lease;
 };
 
-export const findAllLeases = async (): Promise<Lease[]> => {
+export const findAllLeases = async () => {
   return await db
     .select()
-    .from(leases)
-    .orderBy(leases.created_at);
+    .from(lease)
+    .orderBy(lease.created_at);
 };
 
-export const findLeasesByLenderId = async (lender_id: string): Promise<Lease[]> => {
+export const findLeasesByLenderId = async (lenderId: string) => {
   return await db
     .select()
-    .from(leases)
-    .where(eq(leases.lender_id, lender_id))
-    .orderBy(leases.created_at);
+    .from(lease)
+    .where(eq(lease.lenderId, lenderId))
+    .orderBy(lease.created_at);
 };
 
-export const findLeasesByBorrowerId = async (borrower_id: string): Promise<Lease[]> => {
+export const findLeasesByBorrowerId = async (borrowerId: string) => {
   return await db
     .select()
-    .from(leases)
-    .where(eq(leases.borrower_id, borrower_id))
-    .orderBy(leases.created_at);
+    .from(lease)
+    .where(eq(lease.borrowerId, borrowerId))
+    .orderBy(lease.created_at);
 };
 
-export const findLeasesByItemId = async (item_id: string): Promise<Lease[]> => {
+export const findLeasesByItemId = async (itemId: string) => {
   return await db
     .select()
-    .from(leases)
-    .where(eq(leases.item_id, item_id))
-    .orderBy(leases.created_at);
-};u
+    .from(lease)
+    .where(eq(lease.itemId, itemId))
+    .orderBy(lease.created_at);
+};
