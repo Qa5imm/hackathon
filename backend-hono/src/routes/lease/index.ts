@@ -115,17 +115,6 @@ app.patch(
     );
     const lease = await leaseRepository.updateLeaseStatus(id, status);
 
-    // updating the coins of the lender and borrower and updating the status of the lease
-    await userRepository.updateUserCoins(
-      lease_found.borrowerId,
-      (borrowerDetails?.coins || 0) - lease_found.totalAmount,
-    );
-    await userRepository.updateUserCoins(
-      lease_found.lenderId,
-      (lenderDetails?.coins || 0) + lease_found.totalAmount,
-    );
-    const lease = await leaseRepository.updateLeaseStatus(id, status);
-
     return c.json(lease);
   },
 );
