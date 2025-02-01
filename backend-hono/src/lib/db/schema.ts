@@ -82,6 +82,7 @@ export const item = mysqlTable(
   "item",
   {
     id: varchar("id", { length: 128 })
+      .$defaultFn(() => createId())
       .primaryKey(),
     userId: varchar("user_id", { length: 128 })
       .notNull()
@@ -90,6 +91,7 @@ export const item = mysqlTable(
     description: text("description"),
     image: varchar("image", { length: 255 }),
     coins: int("coins").notNull().default(0),
+    period: int("period").notNull().default(1),
     category: mysqlEnum("category", [
       'electronics',
       'clothing',
@@ -113,6 +115,7 @@ export const lease = mysqlTable(
   "lease",
   {
     id: varchar("id", { length: 128 })
+      .$defaultFn(() => createId())
       .primaryKey(),
     userId: varchar("user_id", { length: 128 })
       .notNull()
