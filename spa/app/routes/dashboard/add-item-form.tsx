@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCreateItem, useUpdateItem } from "~/lib/hooks/item";
 import { useState } from "react";
+import { useUploadFile } from "~/lib/hooks/storage";
 
 const itemSchema = z.object({
   name: z.string().min(3),
@@ -179,14 +180,21 @@ function ItemForm({
 
 export function AddItemDialog() {
   const addItemMutation = useCreateItem();
+  const uploadFile = useUploadFile();
   const [open, setOpen] = useState(false);
 
   const onSubmit = async (data: ItemFormData) => {
     console.log(data);
     try {
+      let imageKey = "default-image";
+
+      if (data.image instanceof FileList && data.image[0]) {
+        imageKey = await uploadFile.mutateAsync(data.image[0]);
+      }
+
       const itemData = {
         ...data,
-        image: "thisisanimageurl", // todo: real image upload
+        image: imageKey,
         status: "listed" as const,
       };
 
@@ -227,17 +235,23 @@ export function EditItemDialog({
 }: {
   item: ItemFormData & { id: string };
 }) {
+  const uploadFile = useUploadFile();
   const editItemMutation = useUpdateItem();
   const [open, setOpen] = useState(false);
 
   const onSubmit = async (data: ItemFormData) => {
     try {
+      let imageKey = "default-image";
+
+      if (data.image instanceof FileList && data.image[0]) {
+        imageKey = await uploadFile.mutateAsync(data.image[0]);
+      }
+      console.log(imageKey);
       const itemData = {
         ...data,
-        image: "thisisanimageurl", // todo: real image upload
+        image: imageKey,
         status: "listed" as const,
       };
-
       await editItemMutation.mutateAsync({ id: item.id, data: itemData });
       setOpen(false);
     } catch (err) {

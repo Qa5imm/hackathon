@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useItems } from "~/lib/hooks/item";
+import { getImageURL } from "~/lib/utils";
+import { ItemCard } from "./item-card";
 
 // components/EmptyState.tsx
 const EmptyState = ({ message }: { message: string }) => (
@@ -27,18 +29,6 @@ const LoadingState = () => (
     ))}
   </>
 );
-
-export interface Item {
-  id: string;
-  name: string;
-  description: string | null;
-  image: string | null;
-  coins: number;
-  category: "electronics" | "clothing" | "books" | "sports" | "tools" | "other";
-  userId: string;
-  status: "listed" | "leased" | "delisted";
-  created_at: string;
-}
 
 // goods.tsx
 export default function PublicItems() {
@@ -79,45 +69,6 @@ export default function PublicItems() {
         }
       });
   }, [itemsQuery.data, search, category, sortBy]);
-
-  // simplified item card
-  const ItemCard = ({ item }: { item: Item }) => (
-    <div className="border-4 border-black bg-white p-4">
-      {item.image && (
-        <div className="aspect-square bg-gray-100 mb-4">
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
-
-      <h3 className="font-bold text-xl mb-2">{item.name}</h3>
-      {item.description && (
-        <p className="font-mono text-sm mb-4">{item.description}</p>
-      )}
-
-      <div className="flex justify-between items-center">
-        <span className="font-mono">{item.coins} coins</span>
-        <span
-          className={`px-2 py-1 ${
-            item.status === "listed"
-              ? "bg-green-200"
-              : item.status === "leased"
-              ? "bg-yellow-200"
-              : "bg-red-200"
-          }`}
-        >
-          {item.status === "listed"
-            ? "available rn"
-            : item.status === "leased"
-            ? "borrowed"
-            : "delisted"}
-        </span>
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-100 to-cyan-100 p-4">

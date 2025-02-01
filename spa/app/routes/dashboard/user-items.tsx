@@ -2,6 +2,7 @@ import { useUser } from "~/lib/hooks/user";
 import { AddItemDialog, EditItemDialog } from "./add-item-form";
 import { useNavigate } from "@remix-run/react";
 import { useUpdateItem, useUserItems } from "~/lib/hooks/item";
+import { getImageURL } from "~/lib/utils";
 
 export const UserItems = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ export const UserItems = () => {
               <div className="aspect-square bg-gray-100 mb-4">
                 <img
                   alt={item.name}
-                  src={item.image}
+                  src={getImageURL(item.image)}
                   className="w-full h-full object-cover"
                 />
               </div>
