@@ -22,8 +22,7 @@ export const ItemCategory = {
 export enum leasetatus {
   PENDING = 'pending',
   ACTIVE = 'active',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
+  COMPLETED = 'completed'
 }
 
 export const user = mysqlTable(
@@ -117,20 +116,30 @@ export const lease = mysqlTable(
     id: varchar("id", { length: 128 })
       .$defaultFn(() => createId())
       .primaryKey(),
-    userId: varchar("user_id", { length: 128 })
+    itemId: varchar("item_id", { length: 128 })
+      .notNull()
+      .references(() => item.id),
+    lenderId: varchar("lender_id", { length: 128 })
       .notNull()
       .references(() => user.id),
-    name: varchar("name", { length: 255 }).notNull(),
-    description: text("description"),
-    image: varchar("image", { length: 255 }),
-    coins: int("coins").notNull().default(0),
-    category: mysqlEnum("status", ["active", "completed", "overdue"]).notNull(),
+    borrowerId: varchar("borrower_id", { length: 128 })
+      .notNull()
+      .references(() => user.id),
+    status: mysqlEnum("status", [
+      'pending',
+      'active',
+      'completed',
+      'rejected',
+    ] as const).notNull(),
+    totalAmount: int("total_amount").notNull(),
+    duration: int("duration").notNull(),
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
   },
   (table) => ({
-    userIdIdx: index("user_id_items_idx").on(table.userId),
-    categoryIdx: index("category_idx").on(table.category),
-    nameIdx: index("name_items_idx").on(table.name),
+    itemIdIdx: index("item_id_idx").on(table.itemId),
+    lenderIdIdx: index("lender_id_idx").on(table.lenderId),
+    borrowerIdIdx: index("borrower_id_idx").on(table.borrowerId),
+    statusIdx: index("status_idx").on(table.status),
   })
-);
+);    

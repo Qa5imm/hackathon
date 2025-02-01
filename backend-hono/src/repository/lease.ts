@@ -1,12 +1,11 @@
 import { db } from "../lib/db";
-import { leases } from "@/lib/db/schema";
+import { lease } from "@/lib/db/schema";
 import { eq, and, InferInsertModel, InferSelectModel } from "drizzle-orm";
-import { nanoid } from "nanoid";
 
 type Lease = InferSelectModel<typeof leases>;
 type NewLease = InferInsertModel<typeof leases>;
 
-type LeaseStatus = 'pending' | 'active' | 'completed' | 'cancelled';
+type LeaseStatus = 'pending' | 'active' | 'completed'; 
 
 interface CreateLease {
   item_id: string;
