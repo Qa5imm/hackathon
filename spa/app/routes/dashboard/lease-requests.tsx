@@ -27,7 +27,7 @@ export const LeaseRequests = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {leases.map((lease) => (
-        <LeaseCard key={lease.id} lease={lease} type="request" />
+        <LeaseCard key={lease.lease.id} lease={lease.lease} type="request" />
       ))}
     </div>
   );

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useItems } from "~/lib/hooks/item";
 import { getImageURL } from "~/lib/utils";
 import { ItemCard } from "./item-card";
+import { useUser } from "~/lib/hooks/user";
 
 // components/EmptyState.tsx
 const EmptyState = ({ message }: { message: string }) => (
@@ -37,6 +38,7 @@ export default function PublicItems() {
   const [sortBy, setSortBy] = useState<string>("newest");
   // const [itemsQuery, setItems] = useState<Item[]>([]);
   const itemsQuery = useItems();
+  const userQuery = useUser();
 
   const filteredItems = useMemo(() => {
     // if (error || loading) return [];
@@ -120,7 +122,7 @@ export default function PublicItems() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredItems?.map((item) => (
-              <ItemCard key={item.id} item={item} />
+              <ItemCard key={item.id} item={item} userId={userQuery.data?.id} />
             ))}
           </div>
         )}

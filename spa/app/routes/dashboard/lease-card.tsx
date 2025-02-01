@@ -4,9 +4,34 @@ export const LeaseCard = ({
   lease,
   type,
 }: {
-  lease: any;
+  lease: {
+    id: string;
+    item: {
+      id: string;
+      name: string;
+      description: string;
+      image: string;
+      coins: number;
+      period: number;
+      category: string;
+      status: string;
+      created_at: string;
+      updated_at: string;
+    };
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      coins: number;
+      created_at: string;
+    };
+    status: string;
+    duration: number;
+    totalAmount: number;
+  };
   type: "borrowed" | "request";
 }) => {
+  console.log("lease", lease);
   const updateLeaseMutation = useUpdateLeaseStatus();
 
   const handleStatusUpdate = async (
@@ -25,9 +50,7 @@ export const LeaseCard = ({
           <h3 className="font-bold text-xl">{lease.item.name}</h3>
           <p className="text-sm text-gray-600">
             {type === "borrowed" ? "borrowed from:" : "requested by:"} @
-            {type === "borrowed"
-              ? lease.lender.username
-              : lease.borrower.username}
+            {type === "borrowed" ? lease.user.name : lease.user.name}
           </p>
         </div>
         <span

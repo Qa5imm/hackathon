@@ -3,11 +3,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const leaseApi = {
   getLenderLeases: (lenderId: string) =>
-    axios.get(`http://localhost:3000/lease/lender/${lenderId}`),
+    axios.get(`http://localhost:3000/leases/lender/${lenderId}`),
   getBorrowerLeases: (borrowerId: string) =>
-    axios.get(`http://localhost:3000/lease/borrower/${borrowerId}`),
+    axios.get(`http://localhost:3000/leases/borrower/${borrowerId}`),
   updateLeaseStatus: (id: string, status: LeaseStatus) =>
-    axios.patch(`http://localhost:3000/lease/${id}/status`, { status }),
+    axios.patch(`http://localhost:3000/leases/${id}/status`, { status }),
 };
 
 export const useLenderLeases = (lenderId?: string) => {
@@ -32,6 +32,17 @@ export const useUpdateLeaseStatus = () => {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: LeaseStatus }) =>
       leaseApi.updateLeaseStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leases"] });
+    },
+  });
+};
+
+export const useCreateLease = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { itemId: string; duration: number }) =>
+      axios.post("/leases", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leases"] });
     },

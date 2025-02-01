@@ -8,6 +8,7 @@ import {
 import Navbar from "./components/navbar";
 import type { LinksFunction } from "@remix-run/node";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "./components/ui/toaster";
 import axios from "axios";
 
 import "./tailwind.css";
@@ -65,7 +66,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <>
+      <Toaster></Toaster>
+      <Outlet />
+    </>
+  );
 }
 
 export function HydrateFallback() {

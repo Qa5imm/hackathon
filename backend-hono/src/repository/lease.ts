@@ -1,8 +1,9 @@
 import { db } from "../lib/db";
-import { lease, leasetatus } from "@/lib/db/schema";
-import { eq, and, InferInsertModel, InferSelectModel, ne } from "drizzle-orm";
 
-type LeaseStatus = 'pending' | 'active' | 'completed' | 'rejected'; 
+import { lease, leasetatus, item, user } from "@/lib/db/schema";
+import { eq, ne, and, InferInsertModel, InferSelectModel } from "drizzle-orm";
+
+type LeaseStatus = "pending" | "active" | "completed" | "rejected";
 interface CreateLease {
   itemId: string;
   lenderId: string;
@@ -15,10 +16,10 @@ export const createLease = async (data: CreateLease) => {
   const [created_lease] = await db
     .insert(lease)
     .values({
-        ...data,
-        status: 'pending',
-      })
-    .$returningId()
+      ...data,
+      status: "pending",
+    })
+    .$returningId();
 
   if (!created_lease) {
     throw new Error("Failed to create lease");
@@ -30,11 +31,11 @@ export const createLease = async (data: CreateLease) => {
 export const updateLeaseStatus = async (id: string, status: LeaseStatus) => {
   const [updated_lease] = await db
     .update(lease)
-    .set({ 
+    .set({
       status,
-      updated_at: new Date()
+      updated_at: new Date(),
     })
-    .where(eq(lease.id, id))
+    .where(eq(lease.id, id));
 
   if (!updated_lease) {
     throw new Error("Failed to update lease");
@@ -54,10 +55,7 @@ export const findLeaseById = async (id: string) => {
 };
 
 export const findAllLeases = async () => {
-  return await db
-    .select()
-    .from(lease)
-    .orderBy(lease.created_at);
+  return await db.select().from(lease).orderBy(lease.created_at);
 };
 
 export const findLeasesByLenderId = async (lenderId: string) => {
@@ -65,6 +63,8 @@ export const findLeasesByLenderId = async (lenderId: string) => {
     .select()
     .from(lease)
     .where(eq(lease.lenderId, lenderId))
+    .leftJoin(item, eq(lease.itemId, item.id))
+    .leftJoin(user, eq(lease.lenderId, user.id))
     .orderBy(lease.created_at);
 };
 
@@ -72,6 +72,8 @@ export const findLeasesByBorrowerId = async (borrowerId: string) => {
   return await db
     .select()
     .from(lease)
+    .leftJoin(item, eq(lease.itemId, item.id))
+    .leftJoin(user, eq(lease.borrowerId, user.id))
     .where(eq(lease.borrowerId, borrowerId))
     .orderBy(lease.created_at);
 };
@@ -87,20 +89,20 @@ export const findLeasesByItemId = async (itemId: string) => {
 export const updateOtherLeasesStatus = async (
   currentLeaseId: string,
   itemId: string,
-  status: LeaseStatus
+  status: LeaseStatus,
 ): Promise<number> => {
   const result = await db
     .update(lease)
-    .set({ 
+    .set({
       status,
-      updated_at: new Date() 
+      updated_at: new Date(),
     })
     .where(
       and(
         eq(lease.itemId, itemId),
         ne(lease.id, currentLeaseId),
-        eq(lease.status, 'pending')
-      )
+        eq(lease.status, "pending"),
+      ),
     );
 
   return result.length;

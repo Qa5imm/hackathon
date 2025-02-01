@@ -21,7 +21,7 @@ export const BorrowedItems = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {leases.map((lease) => (
-        <LeaseCard key={lease.id} lease={lease} type="borrowed" />
+        <LeaseCard key={lease.lease.id} lease={lease.lease} type="borrowed" />
       ))}
     </div>
   );
