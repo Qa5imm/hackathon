@@ -93,31 +93,29 @@ app.patch(
     );
     const lenderDetails = await userRepository.findById(lease_found.lenderId);
 
-    if (!lease_found) {
-      return c.json({ message: "Lease not found" }, 404);
-    }
-    if (status === "active") {
-      // Reject all other lease requests for the same item
-      await leaseRepository.updateOtherLeasesStatus(
-        id,
-        lease_found.itemId,
-        "rejected",
-      );
-    }
-    // updating the coins of the lender and borrower and updating the status of the lease
-    await userRepository.updateUserCoins(
-      lease_found.borrowerId,
-      (borrowerDetails?.coins || 0) - lease_found.totalAmount,
-    );
-    await userRepository.updateUserCoins(
-      lease_found.lenderId,
-      (lenderDetails?.coins || 0) + lease_found.totalAmount,
-    );
+  if (!lease_found) {
+    return c.json({ message: "Lease not found" }, 404);
+  }
+  if (status=='completed'){ 
     const lease = await leaseRepository.updateLeaseStatus(id, status);
 
-    return c.json(lease);
-  },
-);
+    return c.json(lease); 
+  }else{
+
+  
+
+   if (status === 'active') {
+    // Reject all other lease requests for the same item
+    await leaseRepository.updateOtherLeasesStatus(id, lease_found.itemId, 'rejected');
+  }  
+  // updating the coins of the lender and borrower and updating the status of the lease 
+  await userRepository.updateUserCoins(lease_found.borrowerId, (borrowerDetails?.coins || 0) - lease_found.totalAmount);
+  await userRepository.updateUserCoins(lease_found.lenderId, (lenderDetails?.coins || 0) + lease_found.totalAmount);
+  const lease = await leaseRepository.updateLeaseStatus(id, status);
+
+  return c.json(lease);
+}
+});
 
 // Get lease by id
 app.get("/:id", requireAuth, async (c) => {
