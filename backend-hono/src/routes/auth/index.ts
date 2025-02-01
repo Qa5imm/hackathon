@@ -27,52 +27,52 @@ export const authRouter = new Hono()
     c.header("Set-Cookie", cookie.serialize());
     return c.json({ message: "Logged out" });
   })
-  .post("/login", async (c) => {
-    const { email, password } = await c.req.json();
+  // .post("/login", async (c) => {
+  //   const { email, password } = await c.req.json();
 
-    const [existing_user] = await getUserAndPassword(email);
+  //   const [existing_user] = await getUserAndPassword(email);
 
-    if (!existing_user) {
-      return c.json({ error: "Account does not exist" }, 401);
-    }
+  //   if (!existing_user) {
+  //     return c.json({ error: "Account does not exist" }, 401);
+  //   }
 
-    const valid_password =
-      (await hash(password)) === existing_user.password.hash;
+  //   const valid_password =
+  //     (await hash(password)) === existing_user.password.hash;
 
-    if (!valid_password) {
-      return c.json({ error: "Invalid credentials" }, 401);
-    }
+  //   if (!valid_password) {
+  //     return c.json({ error: "Invalid credentials" }, 401);
+  //   }
 
-    const session = await lucia.createSession(existing_user.user.id, {});
-    const cookie = lucia.createSessionCookie(session.id);
-    cookie.attributes.domain =
-      process.env.ENVIRONMENT === "prod" ? ".gethunar.com" : "localhost";
+  //   const session = await lucia.createSession(existing_user.user.id, {});
+  //   const cookie = lucia.createSessionCookie(session.id);
+  //   cookie.attributes.domain =
+  //     process.env.ENVIRONMENT === "prod" ? ".gethunar.com" : "localhost";
 
-    c.header("Set-Cookie", cookie.serialize());
-    return c.json({ message: "Logged in", user: existing_user.user });
-  })
-  .post("/register", async (c) => {
-    const { email, name, password } = await c.req.json();
+  //   c.header("Set-Cookie", cookie.serialize());
+  //   return c.json({ message: "Logged in", user: existing_user.user });
+  // })
+  // .post("/register", async (c) => {
+  //   const { email, name, password } = await c.req.json();
 
-    const existing_user = await findByEmail(email);
+  //   const existing_user = await findByEmail(email);
 
-    if (existing_user) {
-      return c.json({ error: "Account already exists" }, 400);
-    }
+  //   if (existing_user) {
+  //     return c.json({ error: "Account already exists" }, 400);
+  //   }
 
-    const created_user = await createUser({ email, name, password });
-    if (!created_user) {
-      return c.json({ error: "Failed to create account" }, 500);
-    }
+  //   const created_user = await createUser({ email, name, password });
+  //   if (!created_user) {
+  //     return c.json({ error: "Failed to create account" }, 500);
+  //   }
 
-    const session = await lucia.createSession(created_user.id, {});
-    const cookie = lucia.createSessionCookie(session.id);
-    cookie.attributes.domain =
-      process.env.ENVIRONMENT === "prod" ? ".gethunar.com" : "localhost";
+  //   const session = await lucia.createSession(created_user.id, {});
+  //   const cookie = lucia.createSessionCookie(session.id);
+  //   cookie.attributes.domain =
+  //     process.env.ENVIRONMENT === "prod" ? ".gethunar.com" : "localhost";
 
-    c.header("Set-Cookie", cookie.serialize());
-    return c.json({ message: "Account created", user: created_user });
-  })
+  //   c.header("Set-Cookie", cookie.serialize());
+  //   return c.json({ message: "Account created", user: created_user });
+  // })
   .get("/google/login", async (c) => {
     const state = generateState();
     const codeVerifier = generateCodeVerifier();
@@ -118,7 +118,7 @@ export const authRouter = new Hono()
       }
 
       const tokens = await google.validateAuthorizationCode(code, codeVerifier);
-      const claims = decodeIdToken(tokens.idToken());
+      const claims = decodeIdToken(tokens.idToken);
       const email = claims.email;
       const name = claims.name;
 

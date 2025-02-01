@@ -9,7 +9,6 @@
     "studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@kinde-oss/kinde-typescript-sdk": "^2.9.1",
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "arctic": "^3.2.1",
@@ -17,7 +16,6 @@
     "drizzle-orm": "^0.39.1",
     "google-auth-library": "^9.15.1",
     "hono": "^4.6.19",
-    "jose": "^5.9.6",
     "lucia": "^3.2.2",
     "mysql2": "^3.12.0"
   },

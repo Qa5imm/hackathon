@@ -1,71 +1,52 @@
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { useEffect } from "react";
+import { useAuth, useUser } from "~/lib/hooks/user";
 import { useNavigate } from "@remix-run/react";
-
-// moved to separate file ideally
-const authApi = {
-  checkUser: () => axios.get("http://localhost:3000/auth"),
-  googleCallback: (params: { code: string; state: string }) =>
-    axios.get("/auth/google/callback", { params, withCredentials: true }),
-  googleLogin: () => axios.get("/auth/google/login"),
-};
+import { useEffect } from "react";
 
 export default function AuthPage() {
   const navigate = useNavigate();
-
-  const { data: user } = useQuery({
-    queryKey: ["user"],
-    queryFn: () => authApi.checkUser().then((res) => res.data?.data),
-    retry: false,
-  });
-
-  const googleCallback = useMutation({
-    mutationFn: authApi.googleCallback,
-    onSuccess: (res) => {
-      if (res.data.user) navigate("/");
-    },
-  });
+  const { handleGoogleAuth } = useAuth(navigate);
+  const userQuery = useUser(navigate);
 
   useEffect(() => {
-    if (user?.id) navigate("/");
-
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    const state = params.get("state");
-
-    if (code && state) googleCallback.mutate({ code, state });
-  }, [user]);
-
-  const handleGoogleAuth = async () => {
-    try {
-      const { data } = await authApi.googleLogin();
-      if (data.url) window.location.href = data.url;
-    } catch (err) {
-      console.error("google auth failed:", err);
-    }
-  };
+    if (userQuery?.data?.id) navigate("/");
+  }, [userQuery?.data]);
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md border-4 border-black p-8 [box-shadow:8px_8px_0_0_#000]">
-        <h1 className="text-4xl font-black mb-12 tracking-tight">
-          enter the void
+    <div className="min-h-screen bg-gradient-to-br from-emerald-100 to-cyan-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md border-4 border-black p-8 bg-white/80 backdrop-blur-sm transform -rotate-1">
+        <h1 className="text-6xl font-black uppercase mb-4 transform rotate-2">
+          join the share economy
         </h1>
+
+        <p className="text-xl font-mono bg-purple-300 inline-block p-2 transform -rotate-1 mb-12">
+          borrow stuff // touch grass // be based
+        </p>
 
         <button
           onClick={handleGoogleAuth}
           className="w-full p-4 flex items-center justify-center gap-3
-                   bg-black text-white font-bold
-                   hover:translate-y-[-2px] transition-transform"
+                   bg-black text-white font-bold text-xl
+                   hover:translate-y-[-4px] hover:rotate-1 transition-all"
         >
           <GoogleIcon />
-          continue w/ google
+          sign in w/ google fr fr
         </button>
 
-        <p className="mt-8 font-mono text-sm text-center">
-          passwords are for boomers
-        </p>
+        <div className="mt-12 font-mono text-sm space-y-2">
+          <div className="border-4 border-black p-4 bg-emerald-200 transform rotate-1">
+            <h2 className="font-bold mb-2">why join?</h2>
+            <ul className="space-y-1">
+              <li>• borrow cool stuff</li>
+              <li>• share ur unused things</li>
+              <li>• build actual community</li>
+              <li>• save money + planet</li>
+            </ul>
+          </div>
+
+          <p className="text-center transform -rotate-1">
+            passwords are mid // web3 auth coming soon™
+          </p>
+        </div>
       </div>
     </div>
   );
