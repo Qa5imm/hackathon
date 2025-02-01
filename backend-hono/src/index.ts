@@ -13,7 +13,11 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:3001", "http://localhost:5173"],
+    origin: [
+      "http://localhost:3001",
+      "http://localhost:5173",
+      "https://providence.lol",
+    ],
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     maxAge: 86400, // Cache preflight requests for 24 hours
