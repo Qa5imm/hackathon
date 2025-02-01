@@ -118,7 +118,8 @@ export const authRouter = new Hono()
       }
 
       const tokens = await google.validateAuthorizationCode(code, codeVerifier);
-      const claims = decodeIdToken(tokens.idToken);
+      console.log(tokens);
+      const claims = decodeIdToken(tokens.idToken());
       const email = claims.email;
       const name = claims.name;
 
@@ -150,6 +151,7 @@ export const authRouter = new Hono()
         user: createdUser,
       });
     } catch (error) {
+      console.log(error);
       return c.json({ error: (error as Error).message }, 500);
     }
   })
