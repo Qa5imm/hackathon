@@ -35,30 +35,34 @@ export default function Dashboard() {
             <div className="text-sm opacity-70">welcome back</div>
             <div className="text-3xl font-black">{userQuery.data?.name}</div>
           </div>
-          <div className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-full font-mono">
-            <span className="text-yellow-400">⭐</span>
-            <span className="font-bold">{userQuery.data?.coins || 0}</span>
-          </div>
         </div>
 
         <div className="font-mono">
           <h2 className="text-2xl font-black mb-4">quick stats</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="border-4 border-black p-4 bg-purple-200 hover:bg-purple-300 transition-colors">
-              <div className="text-3xl font-bold">12</div>
-              <div className="text-sm">items shared</div>
+              <div className="text-3xl font-bold">
+                {userQuery.data?.stats.itemsListed}
+              </div>
+              <div className="text-sm">items listed</div>
             </div>
             <div className="border-4 border-black p-4 bg-green-200 hover:bg-green-300 transition-colors">
-              <div className="text-3xl font-bold">47</div>
-              <div className="text-sm">total borrows</div>
+              <div className="text-3xl font-bold">
+                {userQuery.data?.stats.totalLeases}
+              </div>
+              <div className="text-sm">items borrowed</div>
             </div>
             <div className="border-4 border-black p-4 bg-blue-200 hover:bg-blue-300 transition-colors">
-              <div className="text-3xl font-bold">96%</div>
-              <div className="text-sm">return rate</div>
+              <div className="text-3xl font-bold">
+                {userQuery.data?.stats.leasesAsLender}
+              </div>
+              <div className="text-sm">items lent</div>
             </div>
             <div className="border-4 border-black p-4 bg-yellow-200 hover:bg-yellow-300 transition-colors">
-              <div className="text-3xl font-bold">$1.2k</div>
-              <div className="text-sm">saved by community</div>
+              <div className="text-3xl font-bold">
+                {userQuery.data?.stats.totalCoins}
+              </div>
+              <div className="text-sm">total coins earned</div>
             </div>
           </div>
         </div>

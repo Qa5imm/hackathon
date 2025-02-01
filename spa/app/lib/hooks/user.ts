@@ -15,7 +15,7 @@ export const authApi = {
 export const useUser = (navigate: ReturnType<typeof useNavigate>) => {
   return useQuery({
     queryKey: ["user"],
-    queryFn: () => authApi.checkUser().then((res) => res.data?.data),
+    queryFn: () => authApi.checkUser().then((res) => res.data),
     retry: false,
   });
 };
